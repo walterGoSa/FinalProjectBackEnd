@@ -27,8 +27,8 @@ export class Application extends BootMixin(
     super(options);
 
     this.api({
-      openapi: p.version,
-      info: { title: p.name, version: p.version },
+      openapi: '3.0.0',
+      info: { title: p.name, version: '3.0.0' },
       paths: {},
       components: { securitySchemes: SECURITY_SCHEME_SPEC },
       servers: [{ url: '/' }],

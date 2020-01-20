@@ -28,10 +28,42 @@ const CredentialsSchema = {
   },
 };
 
+export const usersSchema = {
+  type: 'object',
+  required: ['username', 'email', 'password', 'name', 'lastname'],
+  properties: {
+    username: {
+      type: 'string',
+    },
+    email: {
+      type: 'string',
+      format: 'email',
+    },
+    password: {
+      type: 'string',
+      minLength: 8,
+    },
+    name: {
+      type: 'string',
+    },
+    lastname: {
+      type: 'string',
+    },
+  },
+};
+
 export const CredentialsRequestBody = {
   description: 'The input of login function',
   required: true,
   content: {
     'application/json': { schema: CredentialsSchema },
+  },
+};
+
+export const UserRequestBody = {
+  description: 'User Profile',
+  required: true,
+  content: {
+    'application/json': { schema: usersSchema },
   },
 };
