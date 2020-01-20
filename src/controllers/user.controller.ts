@@ -19,7 +19,7 @@ import {
   HttpErrors,
 } from '@loopback/rest';
 import { User } from '../models';
-import { UserRepository, Credentials } from '../repositories';
+import { UserRepository, Credentials, UsersData, PeopleRepository } from '../repositories';
 import { authenticate, TokenService, UserService } from '@loopback/authentication';
 import { SecurityBindings, UserProfile, securityId } from '@loopback/security';
 import { inject } from '@loopback/core';
@@ -28,10 +28,12 @@ import { PasswordHasher } from '../services/hash.password.bcryptjs';
 import { validateCredentials } from '../services/validator';
 import * as _ from 'lodash';
 import { OPERATION_SECURITY_SPEC } from '../utils/security-spec';
-import { CredentialsRequestBody, UserProfileSchema } from './specs/user-controller.specs';
+import { CredentialsRequestBody, UserRequestBody } from './specs/user-controller.specs';
 
 export class UserController {
   constructor(
+    @repository(PeopleRepository)
+    public peopleRepository: PeopleRepository,
     @repository(UserRepository)
     public userRepository: UserRepository,
     @inject(PasswordHasherBindings.PASSWORD_HASHER)
@@ -51,26 +53,29 @@ export class UserController {
     },
   })
   async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(User, {
-            title: 'NewUser',
-            exclude: ['id', 'status'],
-          }),
-        },
-      },
-    })
-    user: Omit<User, 'id'>,
+    @requestBody(UserRequestBody)
+    user: UsersData,
   ): Promise<User> {
 
     validateCredentials(_.pick(user, ['email', 'password']));
+    let usr = {
+      username: user.username,
+      password: user.password,
+      email: user.email
+    };
+    let people = {
+      name: user.name,
+      lastname: user.lastname
+    };
 
-    user.password = await this.passwordHasher.hashPassword(user.password);
+    usr.password = await this.passwordHasher.hashPassword(usr.password);
 
     try {
       // create the new user
-      const savedUser = await this.userRepository.create(user);
+      const savedPeople = await this.peopleRepository.create(people);
+      const savedUser = await this.userRepository.create(usr);
+      this.peopleRepository.updateById(savedPeople.id, { userId: savedUser.id });
+      this.userRepository.updateById(savedUser.id, { peopleId: savedPeople.id });
       delete savedUser.password;
       return savedUser;
     } catch (error) {

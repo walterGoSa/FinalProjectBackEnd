@@ -1,8 +1,8 @@
 import { Entity, model, property, belongsTo } from '@loopback/repository';
-import { People } from './people.model';
+import { User } from './user.model';
 
 @model()
-export class User extends Entity {
+export class People extends Entity {
   @property({
     type: 'number',
     id: true,
@@ -14,31 +14,28 @@ export class User extends Entity {
     type: 'string',
     required: true,
   })
-  username: string;
-
-  @property({
-    type: 'string',
-    required: true,
-    index: {
-      unique: true
-    }
-  })
-  email: string;
+  name: string;
 
   @property({
     type: 'string',
     required: true,
   })
-  password: string;
-
-  @belongsTo(() => People)
-  peopleId: number;
+  lastname: string;
 
   @property({
-    type: 'boolean',
-    default: true
+    type: 'string',
   })
-  status?: boolean;
+  secondlastname?: string;
+
+  @property({
+    type: 'string',
+  })
+  cellphone?: string;
+
+  @property({
+    type: 'date',
+  })
+  birthdate?: string;
 
   @property({
     type: 'date',
@@ -52,13 +49,16 @@ export class User extends Entity {
   })
   updateAt?: Date;
 
-  constructor(data?: Partial<User>) {
+  @belongsTo(() => User)
+  userId: number;
+
+  constructor(data?: Partial<People>) {
     super(data);
   }
 }
 
-export interface UserRelations {
+export interface PeopleRelations {
   // describe navigational properties here
 }
 
-export type UserWithRelations = User & UserRelations;
+export type PeopleWithRelations = People & PeopleRelations;
